@@ -1,18 +1,18 @@
 import React from 'react'
+import axios from 'axios'
 
 export default class AppClass extends React.Component {
   
   state = {
-    currentCoordinates: null,
     message: '',
     steps: 0,
     x: 2,
     y: 2,
-    grid: ['','','','','B','','','','']
+    grid: ['','','','','B','','','',''],
+    emailInput: ''
   }
 
   setArrayByMove = (x, y) => {
-    console.log(x,y)
     if(x === 1 && y === 1){
       return ['B','','','','','','','','']
     }
@@ -42,9 +42,9 @@ export default class AppClass extends React.Component {
     }
   }
 
-
-  
-
+  getCoordinates = () => {
+    return `Coordinates (${[this.state.x, this.state.y]})`
+  }
 
 
   handleLeft = (currentX, currentY) => {
@@ -126,7 +126,6 @@ export default class AppClass extends React.Component {
     }
   }
 
-
   reset = () => {
     this.setState({
         currentBox: 'B',
@@ -135,19 +134,56 @@ export default class AppClass extends React.Component {
         y: 2,
         grid: ['','','','','B','','','',''],
         message: null,
+        emailInput: ''
     })
   }
 
+  submitHandler = e => {
+    e.preventDefault()
+    this.setState({
+      ...this.state,
+      emailInput: ''
+    })
+  }
 
+  onChange = e => {
+    const { value } = e.target;
+    this.setState({
+      ...this.state,
+      emailInput: value
+    })
+  }
+  
+
+  sendData = () => {
+    const newInput = {
+      x: this.state.x,
+      y: this.state.y,
+      steps: this.state.steps,
+      email: this.state.emailInput
+    }
+    axios.post('http://localhost:9000/api/result', newInput)
+    .then(res => {
+      this.setState({
+        ...this.state, message: res.data.message
+      })
+    })
+    .catch(err => {
+      this.setState({
+        ...this.state,
+        message: err.response.data.message
+      })
+    })
+   }
 
   render() {
-    console.log(this.state.grid)
+    
     const { className } = this.props
     return (
       <div id="wrapper" className={className}>
         <div className="info">
-          <h3 id="coordinates">{`Coordinates ${this.state.x}, ${this.state.y}`}</h3>
-          <h3 id="steps">{`You have moved ${this.state.steps} times`}</h3>
+          <h3 id="coordinates">{this.getCoordinates(this.state.grid)}</h3>
+          <h3 id="steps">{`You moved ${this.state.steps} ${this.state.steps === 1 ? 'time' : 'times'}`}</h3>
         </div>
         <div id="grid">
 
@@ -164,9 +200,16 @@ export default class AppClass extends React.Component {
           <button id="down" onClick={() => this.handleDown(this.state.x, this.state.y)}>DOWN</button>
           <button id="reset" onClick={() => this.reset()}>reset</button>
         </div>
-        <form>
-          <input id="email" type="email" placeholder="type email"></input>
-          <input id="submit" type="submit"></input>
+        <form onSubmit={this.submitHandler}>
+          <input 
+            id="email" 
+            type="email" 
+            placeholder="type email" 
+            onChange={this.onChange} 
+            value={this.state.emailInput}
+            >
+          </input>
+          <input id="submit" type="submit" onClick={this.sendData}></input>
         </form>
       </div>
     )
