@@ -10,8 +10,9 @@ test('sanity', () => {
 })
 
 
-test('texts are visible on info', () => {
+test('texts are visible on keypad', () => {
   render(<AppFunctional/>)
 
-  
+  const info = screen.getByText('You moved')
+
 })
