@@ -43,6 +43,15 @@ export default function AppFunctional(props) {
   }
 
 
+  const submitHandler = e => {
+    e.preventDefault()
+    setState({
+      ...state,
+      emailInput: ''
+    })
+  }
+
+
   const getCoordinates = () => {
     return `Coordinates (${[state.x, state.y]})`
   }
@@ -128,13 +137,7 @@ export default function AppFunctional(props) {
 
   
 
-  const submitHandler = e => {
-    e.preventDefault()
-    setState({
-      ...state,
-      emailInput: ''
-    })
-  }
+  
 
   const onChange = e => {
     const { value } = e.target;
@@ -157,7 +160,7 @@ export default function AppFunctional(props) {
     axios.post('http://localhost:9000/api/result', newInput)
     .then(res => {
       setState({
-        ...state, message: res.data.message
+        ...state, message: res.data.message, emailInput: ''
       })
     })
     .catch(err => {
